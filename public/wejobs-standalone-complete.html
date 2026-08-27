@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WEJOBS — Micro Jobs • Simple Tasks • Real Rewards (Single File Edition)</title>
+  <meta name="description" content="Platform freelance micro-jobs terpadu. Ubah keahlian menulis, translasi, dan riset Anda menjadi penghasilan nyata dalam USD." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff8f1',
+              100: '#feeedc',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18 & Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-serif { font-family: 'Playfair Display', serif; }
+    /* Monochrome sponsor filter */
+    .sponsor-mono {
+      filter: grayscale(100%) contrast(125%);
+      opacity: 0.7;
+      transition: all 0.2s ease;
+    }
+    .sponsor-mono:hover {
+      opacity: 1;
+      filter: grayscale(100%) contrast(130%);
+    }
+  </style>
+</head>
+<body class="bg-[#fbfaf8] text-[#1a1a1a] dark:bg-[#141312] dark:text-[#f4f2ee] min-h-screen transition-colors duration-300">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // --- SEED DATA ---
+    const INITIAL_TASKS = [
+      {
+        id: 'task-1',
+        title: 'Review & Ringkasan Bab Buku Non-Fiksi Bisnis Modern',
+        category: 'Writing',
+        subtype: 'Book Summary',
+        payment: 25.00,
+        estimatedTime: '2 jam',
+        wordCount: '800 - 1.200 kata',
+        totalSlots: 40,
+        remainingSlots: 28,
+        deadlineHours: 48,
+        clientName: 'Penerbit Gramedia Pustaka Utama',
+        clientRating: 4.9,
+        description: 'Tulis ringkasan eksekutif dan poin penting dari bab 1-3 buku bisnis terbitan terbaru dengan gaya bahasa lugas.',
+        instructions: ['Baca materi PDF yang disediakan.', 'Sorot 5 strategi kepemimpinan utama.', 'Hindari plagiarisme.'],
+        status: 'available'
+      },
+      {
+        id: 'task-2',
+        title: 'Terjemahan Sinopsis Novel Fiksi Ilmiah (EN - ID)',
+        category: 'Translation',
+        subtype: 'Literary Translation',
+        payment: 18.50,
+        estimatedTime: '1.5 jam',
+        wordCount: '600 - 900 kata',
+        totalSlots: 35,
+        remainingSlots: 14,
+        deadlineHours: 36,
+        clientName: 'Mizan Digital Publishing',
+        clientRating: 4.8,
+        description: 'Terjemahkan sinopsis novel sci-fi pemenang penghargaan ke Bahasa Indonesia dengan pemilihan diksi yang menarik dan sastrawi.',
+        instructions: ['Jaga nuansa sci-fi dan misteri.', 'Gunakan PUEBI yang baik dan benar.', 'Format DOCX/PDF.'],
+        status: 'available'
+      },
+      {
+        id: 'task-3',
+        title: 'Proofreading & Penyuntingan Tata Bahasa Naskah Edukasi',
+        category: 'Editing',
+        subtype: 'Proofreading',
+        payment: 22.00,
+        estimatedTime: '2 jam',
+        wordCount: '1.500 kata',
+        totalSlots: 50,
+        remainingSlots: 39,
+        deadlineHours: 48,
+        clientName: 'Erlangga Educational Group',
+        clientRating: 5.0,
+        description: 'Periksa tanda baca, typo, konsistensi istilah teknis, dan keterbacaan paragraf modul pembelajaran sains tingkat menengah.',
+        instructions: ['Tandai koreksi menggunakan track changes atau highlight.', 'Pastikan kesesuaian istilah biologi.', 'Sertakan catatan koreksi.'],
+        status: 'available'
+      },
+      {
+        id: 'task-4',
+        title: 'Transkripsi Wawancara Jurnalisme Investigasi Podcast',
+        category: 'Transcription',
+        subtype: 'Audio Transcription',
+        payment: 30.00,
+        estimatedTime: '2.5 jam',
+        wordCount: '2.000 kata',
+        totalSlots: 25,
+        remainingSlots: 8,
+        deadlineHours: 24,
+        clientName: 'Tempo Media Lab',
+        clientRating: 4.9,
+        description: 'Transkripsikan rekaman audio wawancara 20 menit menjadi dokumen teks rapi dengan penanda waktu (timestamp) per menit.',
+        instructions: ['Gunakan format teks bersih verbatim.', 'Cantumkan nama pembicara secara jelas.', 'Periksa ejaan nama tokoh.'],
+        status: 'available'
+      },
+      {
+        id: 'task-5',
+        title: 'Penulisan Artikel Opini: Transformasi AI dalam Literasi',
+        category: 'Writing',
+        subtype: 'Opinion Article',
+        payment: 35.00,
+        estimatedTime: '3 jam',
+        wordCount: '1.000 - 1.500 kata',
+        totalSlots: 30,
+        remainingSlots: 19,
+        deadlineHours: 48,
+        clientName: 'Kompas Media Network',
+        clientRating: 5.0,
+        description: 'Susun artikel opini berbobot mengenai dampak kecerdasan buatan terhadap kebiasaan membaca generasi muda.',
+        instructions: ['Sertakan data riset literasi nasional.', 'Argumen seimbang antara peluang dan tantangan.', '100% human-crafted text.'],
+        status: 'available'
+      },
+      {
+        id: 'task-6',
+        title: 'Anotasi & Klasifikasi Sentimen Ulasan Buku Fiksi',
+        category: 'Data Annotation',
+        subtype: 'Text Classification',
+        payment: 15.00,
+        estimatedTime: '1 jam',
+        wordCount: '100 Data Points',
+        totalSlots: 60,
+        remainingSlots: 45,
+        deadlineHours: 24,
+        clientName: 'Bentang Pustaka Fiction Studio',
+        clientRating: 4.7,
+        description: 'Beri label sentimen (Positif, Netral, Negatif) dan kategori tema pada 100 cuplikan ulasan pembaca novel.',
+        instructions: ['Ikuti rubrik penilaian kategori.', 'Pastikan konsistensi pelabelan emosi.', 'Kirim lembar kerja CSV/Excel.'],
+        status: 'available'
+      }
+    ];
+
+    const SPONSORS = [
+      { id: 'sp-1', label: 'Book Publisher', desc: 'Gramedia Pustaka Utama' },
+      { id: 'sp-2', label: 'Digital Publisher', desc: 'Mizan Digital' },
+      { id: 'sp-3', label: 'Media Network', desc: 'Kompas Media Group' },
+      { id: 'sp-4', label: 'Educational Group', desc: 'Erlangga Group' },
+      { id: 'sp-5', label: 'Editorial Network', desc: 'Tempo Media Lab' },
+      { id: 'sp-6', label: 'Fiction Studio', desc: 'Bentang Pustaka' },
+      { id: 'sp-7', label: 'Creative Lab', desc: 'GagasMedia Lab' },
+      { id: 'sp-8', label: 'Heritage Press', desc: 'Balai Pustaka' },
+      { id: 'sp-9', label: 'News Syndicate', desc: 'Republika Syndicate' },
+      { id: 'sp-10', label: 'Scientific Press', desc: 'Deepublish Press' }
+    ];
+
+    const FAQS = [
+      {
+        q: 'Bagaimana cara mulai mengerjakan tugas dan mendapatkan bayaran?',
+        a: 'Daftar akun gratis, pilih tugas yang sesuai di katalog "Explore Jobs", klik "Claim Task", kerjakan sesuai instruksi, lalu unggah naskah Anda. Setelah ditinjau oleh kurator, saldo USD langsung masuk ke dompet Anda.'
+      },
+      {
+        q: 'Berapa batas minimal penarikan dana (Withdrawal)?',
+        a: 'Batas minimal penarikan saldo adalah $100.00 USD. Anda dapat mencairkan dana melalui Transfer Bank Lokal, PayPal, Wise, atau USDT.'
+      },
+      {
+        q: 'Apakah saya bisa menggunakan aplikasi ini secara offline?',
+        a: 'Ya! File mandiri (.html) ini menyimpan seluruh aktivitas, tugas, profil, dan transaksi Anda di penyimpanan lokal peramban (Local Storage).'
+      }
+    ];
+
+    const AVATARS = [
+      { id: 'rabbit', name: 'Kelinci Putih', emoji: '🐇', bg: 'bg-amber-100 dark:bg-amber-900/40 text-amber-600' },
+      { id: 'fox', name: 'Rubah Oranye', emoji: '🦊', bg: 'bg-orange-100 dark:bg-orange-900/40 text-orange-600' },
+      { id: 'panda', name: 'Panda Zen', emoji: '🐼', bg: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600' },
+      { id: 'squirrel', name: 'Tupai Ceria', emoji: '🐿️', bg: 'bg-rose-100 dark:bg-rose-900/40 text-rose-600' },
+      { id: 'cat', name: 'Kucing Cerdas', emoji: '🐱', bg: 'bg-blue-100 dark:bg-blue-900/40 text-blue-600' },
+      { id: 'bear', name: 'Beruang Tenang', emoji: '🐻', bg: 'bg-purple-100 dark:bg-purple-900/40 text-purple-600' }
+    ];
+
+    // --- MAIN APP COMPONENT ---
+    function App() {
+      const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem('wejobs_theme') === 'dark';
+      });
+
+      const [currentPage, setCurrentPage] = useState('landing'); // landing, tasks, mytasks, balance, profile, admin, faq
+      const [selectedTask, setSelectedTask] = useState(null);
+      const [taskDetailOpen, setTaskDetailOpen] = useState(false);
+      const [authModalOpen, setAuthModalOpen] = useState(false);
+      const [authMode, setAuthMode] = useState('login'); // login, register
+
+      // State: User
+      const [user, setUser] = useState(() => {
+        const saved = localStorage.getItem('wejobs_user');
+        return saved ? JSON.parse(saved) : {
+          id: 'user-demo-1',
+          fullName: 'Budi Santoso',
+          email: 'budi.santoso@example.com',
+          phone: '+62 812-3456-7890',
+          address: 'Jakarta Selatan, DKI Jakarta',
+          bio: 'Freelance writer & content creator berdedikasi dengan pengalaman lebih dari 3 tahun.',
+          role: 'user', // user, admin, super_admin
+          avatarType: 'builtin',
+          builtinAvatarId: 'rabbit',
+          balance: 145.50,
+          pendingBalance: 42.00,
+          totalEarned: 320.00
+        };
+      });
+
+      // State: Tasks Catalog
+      const [tasks, setTasks] = useState(() => {
+        const saved = localStorage.getItem('wejobs_tasks');
+        return saved ? JSON.parse(saved) : INITIAL_TASKS;
+      });
+
+      // State: User Assignments (My Tasks)
+      const [assignments, setAssignments] = useState(() => {
+        const saved = localStorage.getItem('wejobs_assignments');
+        return saved ? JSON.parse(saved) : [
+          {
+            id: 'asg-1',
+            taskId: 'task-1',
+            taskTitle: 'Review & Ringkasan Bab Buku Non-Fiksi Bisnis Modern',
+            category: 'Writing',
+            payment: 25.00,
+            status: 'in_progress', // in_progress, under_review, completed, revision_required
+            assignedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+            submissionNote: '',
+            fileName: ''
+          }
+        ];
+      });
+
+      // State: Transactions
+      const [transactions, setTransactions] = useState(() => {
+        const saved = localStorage.getItem('wejobs_transactions');
+        return saved ? JSON.parse(saved) : [
+          {
+            id: 'tx-1001',
+            date: new Date(Date.now() - 86400000 * 2).toISOString(),
+            type: 'Earning',
+            description: 'Penyelesaian Tugas: Transkripsi Audio Podcast #42',
+            status: 'Completed',
+            amount: 30.00
+          },
+          {
+            id: 'tx-1002',
+            date: new Date(Date.now() - 86400000 * 5).toISOString(),
+            type: 'Earning',
+            description: 'Penyelesaian Tugas: Penerjemahan Naskah Ilmiah',
+            status: 'Completed',
+            amount: 45.50
+          },
+          {
+            id: 'tx-1003',
+            date: new Date(Date.now() - 86400000 * 10).toISOString(),
+            type: 'Earning',
+            description: 'Penyelesaian Tugas: Proofreading Modul Pelatihan',
+            status: 'Completed',
+            amount: 70.00
+          }
+        ];
+      });
+
+      // State: Notifications
+      const [notifications, setNotifications] = useState(() => {
+        const saved = localStorage.getItem('wejobs_notifs');
+        return saved ? JSON.parse(saved) : [
+          { id: 'notif-1', title: 'Selamat Datang di WEJOBS!', message: 'Mulai jelajahi pekerjaan mikro editorial dan klaim kompensasi USD pertama Anda.', read: false, time: 'Baru saja' },
+          { id: 'notif-2', title: 'Tugas Siap Dikerjakan', message: 'Tugas "Review & Ringkasan Bab Buku" telah berhasil Anda klaim.', read: false, time: '5 jam lalu' }
+        ];
+      });
+
+      // Toast Notification
+      const [toast, setToast] = useState(null);
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      // Filter States
+      const [selectedCategory, setSelectedCategory] = useState('All');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+
+      // Effect: Save to LocalStorage
+      useEffect(() => {
+        localStorage.setItem('wejobs_user', JSON.stringify(user));
+      }, [user]);
+
+      useEffect(() => {
+        localStorage.setItem('wejobs_tasks', JSON.stringify(tasks));
+      }, [tasks]);
+
+      useEffect(() => {
+        localStorage.setItem('wejobs_assignments', JSON.stringify(assignments));
+      }, [assignments]);
+
+      useEffect(() => {
+        localStorage.setItem('wejobs_transactions', JSON.stringify(transactions));
+      }, [transactions]);
+
+      useEffect(() => {
+        localStorage.setItem('wejobs_notifs', JSON.stringify(notifications));
+      }, [notifications]);
+
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('wejobs_theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('wejobs_theme', 'light');
+        }
+      }, [darkMode]);
+
+      // Handlers
+      const handleClaimTask = (task) => {
+        if (assignments.some(a => a.taskId === task.id && (a.status === 'in_progress' || a.status === 'under_review'))) {
+          showToast('Anda sudah mengambil tugas ini dan sedang dalam proses.', 'error');
+          return;
+        }
+
+        const newAssignment = {
+          id: `asg-${Date.now()}`,
+          taskId: task.id,
+          taskTitle: task.title,
+          category: task.category,
+          payment: task.payment,
+          status: 'in_progress',
+          assignedAt: new Date().toISOString(),
+          submissionNote: '',
+          fileName: ''
+        };
+
+        setAssignments(prev => [newAssignment, ...prev]);
+        setTasks(prev => prev.map(t => t.id === task.id ? { ...t, remainingSlots: Math.max(0, t.remainingSlots - 1) } : t));
+        
+        // Add Notification
+        setNotifications(prev => [
+          { id: `notif-${Date.now()}`, title: 'Tugas Berhasil Diklaim! 📝', message: `Anda telah mengambil "${task.title}". Segera selesaikan sebelum tenggat waktu.`, read: false, time: 'Baru saja' },
+          ...prev
+        ]);
+
+        showToast('Tugas berhasil diklaim! Periksa halaman "Tugas Saya".');
+        setTaskDetailOpen(false);
+        setCurrentPage('mytasks');
+      };
+
+      const handleSubmitWork = (assignmentId, note, file) => {
+        setAssignments(prev => prev.map(a => {
+          if (a.id === assignmentId) {
+            return {
+              ...a,
+              status: 'under_review',
+              submissionNote: note,
+              fileName: file ? file.name : 'dokumen_naskah_revisi.docx',
+              submittedAt: new Date().toISOString()
+            };
+          }
+          return a;
+        }));
+
+        setNotifications(prev => [
+          { id: `notif-${Date.now()}`, title: 'Hasil Kerja Terkirim 📤', message: 'Naskah Anda sedang ditinjau oleh tim kurator. Saldo akan otomatis bertambah setelah disetujui.', read: false, time: 'Baru saja' },
+          ...prev
+        ]);
+
+        showToast('Hasil kerja berhasil dikirim untuk peninjauan kurator.');
+      };
+
+      const handleAdminReview = (assignmentId, action, reason = '') => {
+        const target = assignments.find(a => a.id === assignmentId);
+        if (!target) return;
+
+        if (action === 'accept') {
+          setAssignments(prev => prev.map(a => a.id === assignmentId ? { ...a, status: 'completed' } : a));
+          setUser(prev => ({
+            ...prev,
+            balance: prev.balance + target.payment,
+            totalEarned: prev.totalEarned + target.payment
+          }));
+          setTransactions(prev => [
+            {
+              id: `tx-${Date.now()}`,
+              date: new Date().toISOString(),
+              type: 'Earning',
+              description: `Penyelesaian Tugas: ${target.taskTitle}`,
+              status: 'Completed',
+              amount: target.payment
+            },
+            ...prev
+          ]);
+          setNotifications(prev => [
+            { id: `notif-${Date.now()}`, title: 'Tugas Diterima! +$' + target.payment.toFixed(2) + ' USD 🎉', message: `Hasil kerja "${target.taskTitle}" telah disetujui. Dana telah masuk ke saldo Anda.`, read: false, time: 'Baru saja' },
+            ...prev
+          ]);
+          showToast(`Tugas disetujui! Saldo +$${target.payment.toFixed(2)} USD.`);
+        } else if (action === 'revision') {
+          setAssignments(prev => prev.map(a => a.id === assignmentId ? { ...a, status: 'revision_required', revisionFeedback: reason || 'Mohon lengkapi bagian kesimpulan.' } : a));
+          setNotifications(prev => [
+            { id: `notif-${Date.now()}`, title: 'Permintaan Revisi Naskah ⚠️', message: `Kurator meminta perbaikan pada "${target.taskTitle}": ${reason || 'Periksa instruksi tambahan.'}`, read: false, time: 'Baru saja' },
+            ...prev
+          ]);
+          showToast('Permintaan revisi telah dikirim ke freelancer.', 'error');
+        }
+      };
+
+      const handleWithdrawal = (amount, method, details) => {
+        if (amount < 100) {
+          showToast('Batas minimal penarikan adalah $100.00 USD.', 'error');
+          return;
+        }
+        if (user.balance < amount) {
+          showToast('Saldo Anda tidak mencukupi untuk penarikan ini.', 'error');
+          return;
+        }
+
+        setUser(prev => ({ ...prev, balance: prev.balance - amount }));
+        setTransactions(prev => [
+          {
+            id: `tx-${Date.now()}`,
+            date: new Date().toISOString(),
+            type: 'Withdrawal',
+            description: `Penarikan Dana via ${method} (${details})`,
+            status: 'Processing',
+            amount: -amount
+          },
+          ...prev
+        ]);
+        setNotifications(prev => [
+          { id: `notif-${Date.now()}`, title: 'Permintaan Penarikan Diproses 🏦', message: `Penarikan sebesar $${amount.toFixed(2)} USD via ${method} sedang diproses dalam 1-2 hari kerja.`, read: false, time: 'Baru saja' },
+          ...prev
+        ]);
+        showToast(`Penarikan $${amount.toFixed(2)} USD berhasil diajukan!`);
+      };
+
+      // Filtered Catalog
+      const filteredTasks = tasks.filter(t => {
+        if (selectedCategory !== 'All' && t.category !== selectedCategory) return false;
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      const unreadNotifCount = notifications.filter(n => !n.read).length;
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between">
+          {/* Toast Notification */}
+          {toast && (
+            <div className={`fixed bottom-5 right-5 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 animate-bounce transition-all ${
+              toast.type === 'error' ? 'bg-rose-600 text-white' : 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
+            }`}>
+              <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
+              <span>{toast.message}</span>
+            </div>
+          )}
+
+          {/* NAVBAR */}
+          <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#171614]/90 backdrop-blur-md border-b border-neutral-200/80 dark:border-neutral-800">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              {/* Brand Logo */}
+              <div 
+                onClick={() => setCurrentPage('landing')}
+                className="flex items-center gap-2.5 cursor-pointer select-none"
+              >
+                <div className="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/20">
+                  W
+                </div>
+                <div>
+                  <div className="text-lg font-black tracking-tight text-neutral-900 dark:text-white flex items-center gap-1.5">
+                    WEJOBS <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300">Single Edition</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="hidden md:flex items-center gap-1">
+                <button 
+                  onClick={() => setCurrentPage('tasks')} 
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${currentPage === 'tasks' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                >
+                  Explore Jobs
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('mytasks')} 
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${currentPage === 'mytasks' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                >
+                  Tugas Saya ({assignments.length})
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('balance')} 
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${currentPage === 'balance' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                >
+                  Dompet & Saldo
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('admin')} 
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${currentPage === 'admin' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                >
+                  Panel Admin
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('faq')} 
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${currentPage === 'faq' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                >
+                  FAQ
+                </button>
+              </nav>
+
+              {/* Actions: Theme Toggle, Notifications, Profile */}
+              <div className="flex items-center gap-2.5">
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:scale-105 transition-all text-xs"
+                  title="Toggle Dark Mode"
+                >
+                  {darkMode ? '☀️' : '🌙'}
+                </button>
+
+                {/* Notifications */}
+                <div className="relative">
+                  <button
+                    onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                    className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:scale-105 transition-all relative text-xs"
+                  >
+                    🔔
+                    {unreadNotifCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center">
+                        {unreadNotifCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notifDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-700 shadow-2xl p-4 z-50">
+                      <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800 mb-2">
+                        <span className="text-xs font-bold text-neutral-900 dark:text-white">Pemberitahuan</span>
+                        <button
+                          onClick={() => {
+                            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                            showToast('Semua notifikasi ditandai dibaca.');
+                          }}
+                          className="text-[10px] text-orange-600 font-bold hover:underline"
+                        >
+                          Tandai Dibaca
+                        </button>
+                      </div>
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {notifications.map(n => (
+                          <div key={n.id} className="p-2.5 rounded-xl bg-neutral-50 dark:bg-[#272522] text-xs">
+                            <p className="font-bold text-neutral-900 dark:text-white">{n.title}</p>
+                            <p className="text-neutral-500 dark:text-neutral-400 text-[11px] mt-0.5">{n.message}</p>
+                            <span className="text-[9px] text-neutral-400 mt-1 block">{n.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Pill */}
+                <button
+                  onClick={() => setCurrentPage('profile')}
+                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 hover:border-orange-500 transition-colors"
+                >
+                  <span className="text-lg">
+                    {user.avatarType === 'custom' && user.customAvatarUrl ? (
+                      <img src={user.customAvatarUrl} className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      AVATARS.find(a => a.id === user.builtinAvatarId)?.emoji || '🐇'
+                    )}
+                  </span>
+                  <div className="text-left hidden sm:block">
+                    <p className="text-[11px] font-black text-neutral-900 dark:text-white truncate max-w-[90px]">{user.fullName}</p>
+                    <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">${user.balance.toFixed(2)} USD</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* MAIN BODY ROUTING */}
+          <main className="flex-1">
+            {/* PAGE: LANDING */}
+            {currentPage === 'landing' && (
+              <div className="space-y-16 py-12">
+                {/* Hero Section */}
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-900/60 text-orange-700 dark:text-orange-300 text-xs font-bold">
+                    🚀 Standalone Edition • Buka Langsung Tanpa Instalasi
+                  </span>
+                  <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-neutral-900 dark:text-white max-w-4xl mx-auto leading-tight font-serif">
+                    Micro Jobs, Simple Tasks, <span className="text-orange-600 dark:text-orange-500">Real Rewards.</span>
+                  </h1>
+                  <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto leading-relaxed">
+                    Selesaikan tugas mikro kepenulisan, translasi, dan anotasi naskah dengan jaminan penyelesaian saldo USD nyata dan perlindungan kurasi terverifikasi.
+                  </p>
+                  <div className="flex flex-wrap justify-center items-center gap-3 pt-2">
+                    <button
+                      onClick={() => setCurrentPage('tasks')}
+                      className="px-6 py-3 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm shadow-xl shadow-orange-500/20 hover:scale-105 transition-all"
+                    >
+                      Jelajahi Lowongan Tugas →
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('mytasks')}
+                      className="px-6 py-3 rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 font-bold text-sm text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
+                    >
+                      Buka Tugas Saya ({assignments.length})
+                    </button>
+                  </div>
+                </section>
+
+                {/* SPONSOR MONOCHROME SECTION */}
+                <section className="py-14 border-y border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/70 dark:bg-[#171614]">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
+                        Jaringan Penerbit & Mitra Editorial Terpercaya
+                      </p>
+                      <h2 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
+                        Official Publishing Partners & Syndicates
+                      </h2>
+                    </div>
+
+                    {/* 10 Monochrome Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                      {SPONSORS.map(sp => (
+                        <div
+                          key={sp.id}
+                          className="p-5 rounded-2xl bg-white dark:bg-[#1f1e1b] border border-neutral-200/80 dark:border-[#2d2a26] shadow-xs text-center flex flex-col items-center justify-center gap-3 hover:-translate-y-1 transition-all"
+                        >
+                          <div className="w-full h-16 rounded-xl bg-neutral-100 dark:bg-[#272522] flex items-center justify-center text-xs font-bold text-neutral-500 uppercase tracking-wider sponsor-mono">
+                            {sp.label}
+                          </div>
+                          <span className="px-3 py-1 rounded-full bg-neutral-100 dark:bg-[#2b2824] text-[11px] font-bold text-neutral-700 dark:text-neutral-300">
+                            {sp.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 italic">
+                      "dan website kami di percaya oleh ribuan penerbit lainnya"
+                    </p>
+                  </div>
+                </section>
+
+                {/* Featured Tasks Grid */}
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-black text-neutral-900 dark:text-white">Tugas Pilihan Tersedia</h2>
+                      <p className="text-xs text-neutral-500">Pilih pekerjaan editorial dan klaim kompensasi instan.</p>
+                    </div>
+                    <button
+                      onClick={() => setCurrentPage('tasks')}
+                      className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                    >
+                      Lihat Semua ({tasks.length}) →
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {tasks.slice(0, 3).map(task => (
+                      <div
+                        key={task.id}
+                        className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs flex flex-col justify-between hover:shadow-lg transition-all"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs font-bold">
+                              {task.category}
+                            </span>
+                            <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                              ${task.payment.toFixed(2)} USD
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-neutral-900 dark:text-white text-base line-clamp-2">
+                            {task.title}
+                          </h3>
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-2">
+                            {task.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 pt-4 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between text-xs">
+                          <span className="text-neutral-400">Sisa Slot: <strong className="text-neutral-700 dark:text-neutral-300">{task.remainingSlots}</strong></span>
+                          <button
+                            onClick={() => {
+                              setSelectedTask(task);
+                              setTaskDetailOpen(true);
+                            }}
+                            className="px-4 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs"
+                          >
+                            Detail Tugas
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* PAGE: TASKS CATALOG */}
+            {currentPage === 'tasks' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Katalog Pekerjaan Mikro</h1>
+                  <p className="text-xs text-neutral-500">Pilih dari puluhan naskah editorial, terjemahan, dan kurasi konten.</p>
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* Category Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {['All', 'Writing', 'Translation', 'Editing', 'Transcription', 'Data Annotation'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                          selectedCategory === cat
+                            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Bar */}
+                  <input
+                    type="text"
+                    placeholder="Cari judul pekerjaan..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full sm:w-64 px-3.5 py-2 text-xs rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                {/* Task Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredTasks.map(task => (
+                    <div
+                      key={task.id}
+                      className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs font-bold">
+                            {task.category} • {task.subtype}
+                          </span>
+                          <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                            ${task.payment.toFixed(2)} USD
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-neutral-900 dark:text-white text-base">
+                          {task.title}
+                        </h3>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-3">
+                          {task.description}
+                        </p>
+                        <div className="text-[11px] text-neutral-400 space-y-0.5">
+                          <p>⏱️ Estimasi: {task.estimatedTime} • 📄 {task.wordCount}</p>
+                          <p>🏛️ Mitra: {task.clientName}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                        <span className="text-xs text-neutral-500">Sisa Kuota: <strong>{task.remainingSlots}</strong> / {task.totalSlots}</span>
+                        <button
+                          onClick={() => {
+                            setSelectedTask(task);
+                            setTaskDetailOpen(true);
+                          }}
+                          className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs"
+                        >
+                          Buka Instruksi
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PAGE: MY TASKS */}
+            {currentPage === 'mytasks' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Tugas & Naskah Saya</h1>
+                    <p className="text-xs text-neutral-500">Kelola pengerjaan naskah aktif, unggah berkas, dan pantau hasil peninjauan kurator.</p>
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage('tasks')}
+                    className="px-4 py-2 rounded-xl bg-orange-600 text-white text-xs font-bold hover:bg-orange-700"
+                  >
+                    + Klaim Tugas Baru
+                  </button>
+                </div>
+
+                {assignments.length === 0 ? (
+                  <div className="py-16 text-center rounded-3xl border border-dashed border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-3">
+                    <p className="text-3xl">📭</p>
+                    <p className="font-bold text-neutral-900 dark:text-white text-sm">Belum ada tugas yang sedang Anda kerjakan.</p>
+                    <button
+                      onClick={() => setCurrentPage('tasks')}
+                      className="px-4 py-2 rounded-xl bg-orange-600 text-white text-xs font-bold"
+                    >
+                      Buka Katalog Pekerjaan
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {assignments.map(asg => (
+                      <div
+                        key={asg.id}
+                        className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-4"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="space-y-1">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                              asg.status === 'completed'
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                : asg.status === 'under_review'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                : asg.status === 'revision_required'
+                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                            }`}>
+                              {asg.status.replace('_', ' ')}
+                            </span>
+                            <h3 className="text-lg font-bold text-neutral-900 dark:text-white">{asg.taskTitle}</h3>
+                          </div>
+                          <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                            +${asg.payment.toFixed(2)} USD
+                          </span>
+                        </div>
+
+                        {/* Revision warning if any */}
+                        {asg.status === 'revision_required' && (
+                          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300 space-y-1">
+                            <p className="font-bold">⚠️ Catatan Revisi dari Kurator:</p>
+                            <p>{asg.revisionFeedback || 'Mohon lengkapi perbaikan sesuai instruksi naskah.'}</p>
+                          </div>
+                        )}
+
+                        {/* Submission Area */}
+                        {(asg.status === 'in_progress' || asg.status === 'revision_required') && (
+                          <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 space-y-3">
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Ringkasan / Catatan Penyerahan:</label>
+                              <textarea
+                                id={`note-${asg.id}`}
+                                rows="2"
+                                placeholder="Tuliskan catatan pengerjaan atau tautan berkas pendukung..."
+                                className="w-full p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <input
+                                type="file"
+                                id={`file-${asg.id}`}
+                                className="text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neutral-200 file:text-neutral-800 hover:file:bg-neutral-300 cursor-pointer"
+                              />
+                              <button
+                                onClick={() => {
+                                  const noteEl = document.getElementById(`note-${asg.id}`);
+                                  const fileEl = document.getElementById(`file-${asg.id}`);
+                                  const file = fileEl.files[0];
+                                  handleSubmitWork(asg.id, noteEl.value, file);
+                                }}
+                                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
+                              >
+                                Kirim Hasil Kerja
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {asg.status === 'under_review' && (
+                          <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl">
+                            ⏳ Naskah telah dikirim ({asg.fileName || 'dokumen.docx'}). Kurator sedang memeriksa kelayakan sebelum saldo dicairkan.
+                          </div>
+                        )}
+
+                        {asg.status === 'completed' && (
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl font-bold">
+                            ✅ Tugas telah diterima & kompensasi +${asg.payment.toFixed(2)} USD telah masuk ke saldo utama Anda.
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PAGE: BALANCE & LEDGER */}
+            {currentPage === 'balance' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div>
+                  <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Dompet & Buku Besar Keuangan</h1>
+                  <p className="text-xs text-neutral-500">Saldo USD riil, penarikan dana, dan riwayat mutasi transaksi terperinci.</p>
+                </div>
+
+                {/* Balance Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-1">
+                    <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Saldo Tersedia</p>
+                    <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">${user.balance.toFixed(2)} <span className="text-xs font-bold text-neutral-400">USD</span></p>
+                    <p className="text-[11px] text-neutral-500">Siap dicairkan ke rekening Anda.</p>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-1">
+                    <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Dalam Peninjauan</p>
+                    <p className="text-3xl font-black text-amber-600 dark:text-amber-400">${user.pendingBalance.toFixed(2)} <span className="text-xs font-bold text-neutral-400">USD</span></p>
+                    <p className="text-[11px] text-neutral-500">Tugas yang sedang diperiksa kurator.</p>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-1">
+                    <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Total Penghasilan</p>
+                    <p className="text-3xl font-black text-neutral-900 dark:text-white">${user.totalEarned.toFixed(2)} <span className="text-xs font-bold text-neutral-400">USD</span></p>
+                    <p className="text-[11px] text-neutral-500">Akumulasi seluruh kompensasi.</p>
+                  </div>
+                </div>
+
+                {/* Withdrawal Form */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Ajukan Pencairan Saldo (Withdrawal)</h2>
+                    <span className="text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950 px-2.5 py-1 rounded-lg">Minimal $100.00 USD</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Nominal Penarikan (USD):</label>
+                      <input
+                        type="number"
+                        id="w-amount"
+                        defaultValue="100.00"
+                        min="100"
+                        step="10"
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Metode Pembayaran:</label>
+                      <select
+                        id="w-method"
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      >
+                        <option value="Bank BCA / Mandiri / BRI">Transfer Bank Lokal (BCA / Mandiri / BRI)</option>
+                        <option value="PayPal USD">PayPal USD</option>
+                        <option value="Wise Transfer">Wise Multi-Currency</option>
+                        <option value="USDT (TRC-20)">USDT Crypto (TRC-20)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Nomor Rekening / Wallet:</label>
+                      <input
+                        type="text"
+                        id="w-details"
+                        placeholder="Contoh: 1234567890 a.n Budi Santoso"
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const amount = parseFloat(document.getElementById('w-amount').value);
+                      const method = document.getElementById('w-method').value;
+                      const details = document.getElementById('w-details').value;
+                      if (!details) {
+                        showToast('Harap masukkan nomor rekening / alamat wallet.', 'error');
+                        return;
+                      }
+                      handleWithdrawal(amount, method, details);
+                    }}
+                    className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md"
+                  >
+                    Proses Penarikan Dana Sekarang
+                  </button>
+                </div>
+
+                {/* Ledger Table */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Buku Besar Transaksi (Ledger)</h2>
+                    <span className="text-xs text-neutral-400">{transactions.length} mutasi</span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="border-b border-neutral-200 dark:border-neutral-800 text-neutral-400 uppercase text-[10px]">
+                        <tr>
+                          <th className="py-2.5 px-2">Tanggal</th>
+                          <th className="py-2.5 px-2">ID Mutasi</th>
+                          <th className="py-2.5 px-2">Tipe</th>
+                          <th className="py-2.5 px-2">Keterangan</th>
+                          <th className="py-2.5 px-2 text-right">Jumlah (USD)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                        {transactions.map(tx => (
+                          <tr key={tx.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30">
+                            <td className="py-3 px-2 text-neutral-500 whitespace-nowrap">{new Date(tx.date).toLocaleDateString('id-ID')}</td>
+                            <td className="py-3 px-2 font-mono text-[11px] text-neutral-400">{tx.id}</td>
+                            <td className="py-3 px-2 font-bold text-neutral-700 dark:text-neutral-300">{tx.type}</td>
+                            <td className="py-3 px-2 text-neutral-600 dark:text-neutral-400 max-w-xs truncate">{tx.description}</td>
+                            <td className={`py-3 px-2 text-right font-black ${tx.amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                              {tx.amount >= 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE: PROFILE SETTINGS */}
+            {currentPage === 'profile' && (
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div>
+                  <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Pengaturan Profil Pengguna</h1>
+                  <p className="text-xs text-neutral-500">Sesuaikan informasi kontak, biodata, dan avatar karakter profil Anda.</p>
+                </div>
+
+                <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-6">
+                  {/* Avatar Selector */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Pilih Avatar Karakter:</label>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                      {AVATARS.map(av => (
+                        <button
+                          key={av.id}
+                          type="button"
+                          onClick={() => setUser(prev => ({ ...prev, avatarType: 'builtin', builtinAvatarId: av.id, customAvatarUrl: null }))}
+                          className={`p-3 rounded-2xl flex flex-col items-center gap-1.5 border transition-all ${
+                            user.avatarType === 'builtin' && user.builtinAvatarId === av.id
+                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 ring-2 ring-orange-500/20'
+                              : 'border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                          }`}
+                        >
+                          <span className="text-3xl">{av.emoji}</span>
+                          <span className="text-[10px] font-bold text-neutral-700 dark:text-neutral-300">{av.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Form Inputs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Nama Lengkap:</label>
+                      <input
+                        type="text"
+                        value={user.fullName}
+                        onChange={e => setUser({ ...user, fullName: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Alamat Email:</label>
+                      <input
+                        type="email"
+                        value={user.email}
+                        disabled
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-xs text-neutral-500 cursor-not-allowed"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">No. WhatsApp / HP:</label>
+                      <input
+                        type="text"
+                        value={user.phone}
+                        onChange={e => setUser({ ...user, phone: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Domisili / Kota:</label>
+                      <input
+                        type="text"
+                        value={user.address}
+                        onChange={e => setUser({ ...user, address: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Bio Singkat:</label>
+                    <textarea
+                      rows="3"
+                      value={user.bio}
+                      onChange={e => setUser({ ...user, bio: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-900 dark:text-white"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => showToast('Semua pengaturan profil berhasil disimpan permanen! ✔️')}
+                    className="w-full py-3 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-md"
+                  >
+                    Simpan Semua Pengaturan Profil
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE: ADMIN DASHBOARD */}
+            {currentPage === 'admin' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Panel Kurator & Admin</h1>
+                    <p className="text-xs text-neutral-500">Tinjau penyerahan naskah, setujui pembayaran saldo, dan kelola pekerjaan.</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-xl bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 text-xs font-bold">
+                    Super Admin Mode
+                  </span>
+                </div>
+
+                {/* Submissions Review Queue */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-4">
+                  <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Antrean Peninjauan Naskah (Review Queue)</h2>
+                  
+                  {assignments.filter(a => a.status === 'under_review').length === 0 ? (
+                    <p className="text-xs text-neutral-400 py-6 text-center">Tidak ada naskah yang menunggu peninjauan saat ini.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {assignments.filter(a => a.status === 'under_review').map(asg => (
+                        <div key={asg.id} className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-bold text-neutral-900 dark:text-white text-sm">{asg.taskTitle}</p>
+                              <p className="text-xs text-neutral-400">Berkas: {asg.fileName || 'dokumen_naskah.docx'}</p>
+                              {asg.submissionNote && <p className="text-xs text-neutral-600 dark:text-neutral-300 italic mt-1">"{asg.submissionNote}"</p>}
+                            </div>
+                            <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">+${asg.payment.toFixed(2)} USD</span>
+                          </div>
+                          <div className="flex items-center gap-2 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                            <button
+                              onClick={() => handleAdminReview(asg.id, 'accept')}
+                              className="px-4 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700"
+                            >
+                              Terima & Saldo Cair ✔️
+                            </button>
+                            <button
+                              onClick={() => {
+                                const reason = prompt('Masukkan alasan permintaan revisi:', 'Mohon perbaiki format sitasi dan kesimpulan.');
+                                if (reason) handleAdminReview(asg.id, 'revision', reason);
+                              }}
+                              className="px-4 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700"
+                            >
+                              Minta Revisi ⚠️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* PAGE: FAQ */}
+            {currentPage === 'faq' && (
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+                <div>
+                  <h1 className="text-3xl font-black text-neutral-900 dark:text-white">Frequently Asked Questions (FAQ)</h1>
+                  <p className="text-xs text-neutral-500">Pertanyaan umum seputar pengerjaan tugas, kompensasi, dan aturan penarikan dana.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {FAQS.map((faq, idx) => (
+                    <div key={idx} className="p-6 rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-2">
+                      <h3 className="font-bold text-neutral-900 dark:text-white text-base">❓ {faq.q}</h3>
+                      <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{faq.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* TASK DETAIL MODAL */}
+          {taskDetailOpen && selectedTask && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="w-full max-w-xl rounded-3xl bg-white dark:bg-[#1e1d1a] border border-neutral-200 dark:border-neutral-800 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
+                  <span className="px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 text-xs font-bold">
+                    {selectedTask.category} • {selectedTask.subtype}
+                  </span>
+                  <button
+                    onClick={() => setTaskDetailOpen(false)}
+                    className="text-neutral-400 hover:text-neutral-600 dark:hover:text-white text-lg font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-neutral-900 dark:text-white">{selectedTask.title}</h2>
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-black text-lg">${selectedTask.payment.toFixed(2)} USD</span>
+                    <span className="text-neutral-400">• Tenggat {selectedTask.deadlineHours} Jam</span>
+                    <span className="text-neutral-400">• Sisa {selectedTask.remainingSlots} Slot</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs text-neutral-600 dark:text-neutral-400">
+                  <p className="font-bold text-neutral-900 dark:text-white">Deskripsi Pekerjaan:</p>
+                  <p>{selectedTask.description}</p>
+                  
+                  <p className="font-bold text-neutral-900 dark:text-white pt-2">Instruksi Pengerjaan:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {selectedTask.instructions.map((inst, i) => (
+                      <li key={i}>{inst}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setTaskDetailOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  >
+                    Tutup
+                  </button>
+                  <button
+                    onClick={() => handleClaimTask(selectedTask)}
+                    className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-md shadow-orange-500/20"
+                  >
+                    Klaim Tugas Ini Sekarang
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <footer className="border-t border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-[#171614] py-8 text-center text-xs text-neutral-500 space-y-2">
+            <p className="font-bold text-neutral-900 dark:text-white">WEJOBS Global Freelance Platform — Single File Edition</p>
+            <p>100% Standalone • Kompatibel dengan semua browser modern tanpa server tambahan.</p>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

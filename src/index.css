@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #f4f7fc;
+    --bg-surface: #eaf1fa;
+    --bg-card: #ffffff;
+    --border-color: #dbe4f0;
+    --text-primary: #0f172a;
+    --text-muted: #475569;
+    --accent-blue: #2563eb;
+    --accent-orange: #f97316;
+    --accent-emerald: #10b981;
+  }
+
+  .dark {
+    --bg-primary: #090e1a;
+    --bg-surface: #0f172a;
+    --bg-card: #131f38;
+    --border-color: #1e3056;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-orange: #fb923c;
+    --accent-emerald: #34d399;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, .font-serif-title {
+    font-family: 'Playfair Display', 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+  }
+}
+
+/* Professional Color System & Surface Helpers */
+.bg-soft-blue {
+  background-color: #eff6ff;
+}
+
+.dark .bg-soft-blue {
+  background-color: #0f1a30;
+}
+
+.bg-soft-orange {
+  background-color: #fff7ed;
+}
+
+.dark .bg-soft-orange {
+  background-color: #26150a;
+}
+
+.border-soft-blue {
+  border-color: #dbeafe;
+}
+
+.dark .border-soft-blue {
+  border-color: #1e3056;
+}
+
+.artistic-paper {
+  background-color: #f4f7fc;
+}
+
+.dark .artistic-paper {
+  background-color: #090e1a;
+}
+
+.artistic-card {
+  background-color: #ffffff;
+  border: 1px solid #dbe4f0;
+}
+
+.dark .artistic-card {
+  background-color: #131f38;
+  border-color: #1e3056;
+}
+
+.artistic-pill {
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.artistic-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.15), transparent);
+}
+
+.dark .artistic-divider {
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.25), transparent);
+}
+
+/* Custom delicate scrollbars with soft blue-orange accents */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.2);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 146, 60, 0.6);
+}

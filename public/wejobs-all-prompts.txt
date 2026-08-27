@@ -1,0 +1,199 @@
+# DOKUMEN RIWAYAT & KOMPILASI PERINTAH LENGKAP PENGEMBANGAN WEJOBS
+**Proyek:** WEJOBS — Platform Micro-Jobs Freelance Kepenulisan & Tugas Editorial
+**Format Dokumen:** Single-File Master Prompt Log & System Specification
+**Waktu Penyusunan:** 2026-08-14
+
+---
+
+## DAFTAR ISI
+1. [Kronologi Seluruh Perintah (Full Prompt Log)](#1-kronologi-seluruh-perintah-full-prompt-log)
+2. [Spesifikasi Arsitektur & Aturan Bisnis (Core Business Logic)](#2-spesifikasi-arsitektur--aturan-bisnis)
+3. [Rangkuman Fitur & Modul Antarmuka (Feature Inventory)](#3-rangkuman-fitur--modul-antarmuka)
+4. [Master Blueprint JSON (Skema Data & State)](#4-master-blueprint-json-skema-data--state)
+
+---
+
+## 1. KRONOLOGI SELURUH PERINTAH (FULL PROMPT LOG)
+
+Berikut adalah urutan seluruh perintah dan arahan yang Anda berikan sejak awal inisiasi proyek hingga versi final:
+
+### PERINTAH 1: Inisiasi Awal Platform WEJOBS
+> *"Buatkan website platform micro jobs bernama WEJOBS dengan tema clean, profesional, dan modern. Platform ini diperuntukkan bagi freelancer untuk mengerjakan tugas-tugas sederhana seperti penulisan ringkasan buku, translasi bahasa, proofreading naskah, transkripsi audio, dan anotasi data dengan imbalan nyata dalam USD ($)."*
+
+**Hasil Implementasi:**
+- Pembuatan struktur inti aplikasi web responsif berbasis React 18, TypeScript, Tailwind CSS, dan Express backend.
+- Penyusunan identitas visual berkelas (*Clean Editorial Palette* / Orange-Amber Accent).
+- Sistem autentikasi akun (Login, Register, Demo Switcher).
+- Modul jelajah pekerjaan (*Explore Jobs*), klaim tugas (*Task Claiming*), dan antarmuka *Task Detail*.
+
+---
+
+### PERINTAH 2: Sistem Keuangan, Dompet & Minimum Penarikan Dana
+> *"Tambahkan halaman dompet/saldo (Balance Page). Pastikan mata uang menggunakan USD ($). Buat aturan batas minimal penarikan dana (Withdrawal) sebesar $100.00 USD. Sediakan berbagai metode pencairan seperti Bank Transfer, PayPal, Wise, dan USDT, serta buatkan tabel mutasi transaksi keuangan lengkap."*
+
+**Hasil Implementasi:**
+- Modul *Balance & Wallet Page* dengan kartu statistik Saldo Tersedia, Saldo Tertunda (*Pending Escrow*), dan Total Penghasilan Seumur Hidup.
+- Logika validasi penarikan ketat: tombol penarikan hanya aktif jika saldo ≥ $100.00 USD.
+- Form modal penarikan dengan pilihan saluran pembayaran (*Local Bank Transfer, PayPal, Wise, Crypto USDT TRC-20*).
+- Riwayat mutasi transaksi (*Transaction Ledger*) lengkap dengan ID transaksi, tipe, waktu, status, dan nominal.
+
+---
+
+### PERINTAH 3: Sistem Pengerjaan Tugas & Pengiriman Naskah (My Tasks)
+> *"Buatkan halaman Tugas Saya (My Tasks) di mana pengguna bisa melihat tugas yang sedang aktif dikerjakan, waktu tenggat, tombol penyerahan tugas dengan upload berkas/naskah, catatan pengantar, serta status peninjauan (In Progress, Under Review, Completed, Revision Required)."*
+
+**Hasil Implementasi:**
+- Halaman *My Tasks* dengan sistem tab filter status pengerjaan.
+- Form modal penyerahan tugas (*Submission Form*) yang mendukung unggah berkas (PDF/DOCX) dan catatan eksekutif.
+- Fitur penghitung kata dan karakter otomatis (*Live Word & Character Counter*) untuk memvalidasi naskah.
+- Kotak pencarian tugas aktif secara langsung.
+
+---
+
+### PERINTAH 4: Panel Kurator & Admin (Admin Review Dashboard)
+> *"Buat panel Admin / Kurator untuk meninjau hasil naskah yang dikirim oleh freelancer. Admin bisa menyetujui tugas (Approve & bayar ke saldo freelancer), meminta revisi dengan catatan khusus (Request Revision), atau menolak tugas dengan alasan yang jelas."*
+
+**Hasil Implementasi:**
+- Halaman *Admin Dashboard* khusus untuk kurasi berkas penyerahan.
+- Alur persetujuan: saat tugas disetujui, saldo freelancer langsung bertambah secara otomatis dan tercatat di buku besar mutasi.
+- Alur revisi: kurator dapat mengetikkan catatan koreksi yang langsung muncul di halaman *My Tasks* freelancer dan memicu notifikasi.
+
+---
+
+### PERINTAH 5: Jaringan Mitra & Sponsor Monokrom (Sponsors & Publishers Network)
+> *"Tambahkan section sponsor / mitra penerbit terpercaya di halaman landing. Tampilkan minimal 10 penerbit ternama (Gramedia, Mizan, Kompas, Erlangga, Tempo, Bentang, GagasMedia, Balai Pustaka, Republika, Deepublish) dengan logo monokrom yang elegan dan label kategori masing-masing, serta tambahkan teks penutup 'dan website kami dipercaya oleh ribuan penerbit lainnya'."*
+
+**Hasil Implementasi:**
+- Komponen *SponsorsSection* dengan layout grid 10 kartu mitra monokrom berpresisi tinggi.
+- Label kategori penerbit di setiap kartu (*Book Publisher, Digital Publisher, Media Network, Educational Group, Editorial Lab, Fiction Studio, Heritage Press, dll*).
+- Tipografi kutipan estetis di bawah grid sponsor.
+
+---
+
+### PERINTAH 6: Pengayaan Detail Tugas, Bagikan Link & Filter Notifikasi
+> *"Tingkatkan fitur detail pekerjaan dengan informasi estimasi tarif per 100 kata, tombol salin link tugas (Share Task), serta buat notifikasi di navbar memiliki tab filter All dan Unread."*
+
+**Hasil Implementasi:**
+- Perhitungan rasio tarif kompensasi otomatis (~$X.XX per 100 kata) pada modal detail tugas.
+- Tombol salin tautan tugas (*Share Link*) dengan notifikasi *Link Copied!*.
+- Dropdown notifikasi navbar dengan tab pemilah *All* dan *Unread* serta tombol *Mark All as Read*.
+
+---
+
+### PERINTAH 7: Ekspor CSV & Cetak Rekening Koran
+> *"Tambahkan fitur Ekspor CSV dan Cetak Laporan Keuangan (Print Statement) pada tabel riwayat transaksi, serta fitur salin cepat Transaction ID."*
+
+**Hasil Implementasi:**
+- Tombol *Export CSV* instan yang mengonversi buku besar transaksi menjadi berkas `.csv`.
+- Tombol *Print Statement* untuk mencetak laporan rekening koran langsung dari browser.
+- Tombol salin ID transaksi cepat dengan ikon centang konfirmasi.
+
+---
+
+### PERINTAH 8: Single-File Standalone Edition (Satu File Lengkap Siap Download)
+> *"Sekarang jadikan website ini menjadi satu file siap download, semuanya wajib lengkap."*
+
+**Hasil Implementasi:**
+- Pembuatan berkas mandiri `wejobs-standalone-complete.html` yang merangkum seluruh antarmuka (Landing, Katalog Tugas, Tugas Saya, Dompet & Saldo, Profil, Panel Admin, FAQ, Sponsor, Modal Auth, Dark Mode) dalam 1 file HTML portabel tanpa dependensi instalasi luar.
+- Penyediaan endpoint unduh `/download/wejobs-app.html` serta tombol unduh di Navbar dan Footer.
+
+---
+
+### PERINTAH 9: Kompilasi Seluruh Perintah Menjadi Satu File
+> *"Sekarang jadikan satu seluruh perintah saya dari awal pembuatan website ini sampai sekarang, jadikan menjadi satu file."*
+
+**Hasil Implementasi:**
+- Penyusunan berkas komprehensif ini (`WEJOBS_ALL_PROMPTS_AND_SPECIFICATION.md`) yang merangkum seluruh instruksi, alur evolusi kode, serta blueprint fungsional platform.
+
+---
+
+### PERINTAH 10: File Prompt Siap Download
+> *"Berikan saya file promptnya siap download."*
+
+**Hasil Implementasi:**
+- Penyediaan file prompt dalam format teks murni `.txt` (`wejobs-all-prompts.txt`) dan format markdown `.md` (`WEJOBS_ALL_PROMPTS_AND_SPECIFICATION.md`).
+- Penambahan tombol download cepat file prompt di Navbar dan Footer.
+
+---
+
+## 2. SPESIFIKASI ARSITEKTUR & ATURAN BISNIS
+
+### A. Model Data Pengguna
+- **Role:** `user` (Freelancer) & `admin` (Kurator/Pengelola).
+- **Struktur Profil:** Nama Lengkap, Email, Nomor Telepon, Alamat, Bio, Tipe Avatar (Built-in Hewan/Emoji atau Custom URL).
+- **Saldo (USD):** 
+  - `balance`: Saldo siap dicairkan.
+  - `pendingBalance`: Dana dalam proses peninjauan tugas.
+  - `totalEarned`: Akumulasi penghasilan riil.
+
+### B. Aturan Pengerjaan Tugas (Workflow Lifecycle)
+1. **Available:** Tugas tayang di katalog dengan informasi bayaran fixed USD, kuota slot, dan estimasi waktu.
+2. **Claimed / In Progress:** Freelancer mengklaim tugas; kuota berkurang 1 slot.
+3. **Under Review:** Freelancer mengunggah naskah dan catatan ringkasan; tugas berpindah ke antrian kurator.
+4. **Revision Required:** Kurator mengirim umpan balik perbaikan; freelancer dapat mengirim ulang.
+5. **Completed:** Tugas disetujui; saldo USD otomatis ditransfer ke dompet freelancer dan tercatat di mutasi buku besar.
+
+### C. Kebijakan Penarikan Dana (Withdrawal Policy)
+- **Minimum Withdrawal:** `$100.00 USD`.
+- **Kanal Pencairan:** Rekening Bank Lokal Indonesia (BCA, Mandiri, BRI, BNI), PayPal, Wise, USDT Crypto (TRC-20).
+- **Waktu Pemrosesan:** 1-2 hari kerja verifikasi escrow.
+
+---
+
+## 3. RANGKUMAN FITUR & MODUL ANTARMUKA
+
+| Modul / Halaman | Fungsi Utama |
+| :--- | :--- |
+| **Landing Page** | Hero section interaktif, 10 sponsor penerbit monokrom, statistik platform, ulasan pengguna, dan cuplikan lowongan unggulan. |
+| **Explore Jobs** | Katalog lengkap tugas editorial dengan filter kategori (*Writing, Translation, Editing, Transcription, Annotation*), pencarian teks, dan detail kompensasi. |
+| **Task Detail Modal** | Panduan pengerjaan langkah-demi-langkah, estimasi tarif per 100 kata, kuota tersisa, dan tombol klaim instan. |
+| **My Tasks** | Manajemen pengerjaan aktif, counter kata & karakter live, form submit berkas, dan penanganan instruksi revisi. |
+| **Balance & Ledger** | Kartu saldo USD, form permohonan penarikan dana (min. $100), tabel mutasi lengkap, ekspor CSV, dan cetak rekening koran. |
+| **Admin Dashboard** | Panel peninjauan naskah, validasi berkas penyerahan, tombol persetujuan saldo otomatis, dan form revisi kurator. |
+| **Profile Page** | Pengaturan biodata, pemilihan avatar grafis/emoji, dan ringkasan pencapaian rating freelancer. |
+| **FAQ & Legal** | Pusat bantuan pertanyaan umum dan ketentuan layanan escrow platform. |
+| **Standalone Downloader** | Kemampuan mengunduh seluruh aplikasi dalam satu file `.html` portabel. |
+| **Prompt Downloader** | Kemampuan mengunduh file kompilasi seluruh prompt dalam format `.txt` dan `.md`. |
+
+---
+
+## 4. MASTER BLUEPRINT JSON (SKEMA DATA & STATE)
+
+```json
+{
+  "appName": "WEJOBS",
+  "currency": "USD ($)",
+  "minWithdrawal": 100.00,
+  "supportedCategories": [
+    "Writing",
+    "Translation",
+    "Editing & Proofreading",
+    "Transcription",
+    "Data Annotation"
+  ],
+  "payoutMethods": [
+    "Bank Transfer (IDR/USD)",
+    "PayPal",
+    "Wise Transfer",
+    "USDT (TRC-20)"
+  ],
+  "monochromeSponsors": [
+    "Gramedia Pustaka Utama",
+    "Mizan Digital Publishing",
+    "Kompas Media Network",
+    "Erlangga Educational Group",
+    "Tempo Media Lab",
+    "Bentang Pustaka",
+    "GagasMedia Lab",
+    "Balai Pustaka",
+    "Republika Syndicate",
+    "Deepublish Press"
+  ],
+  "standaloneFile": "wejobs-standalone-complete.html",
+  "promptFile": "wejobs-all-prompts.txt",
+  "status": "Production Ready"
+}
+```
+
+---
+*Dokumen ini merupakan catatan lengkap dan terpadu dari seluruh instruksi pembuatan aplikasi WEJOBS.*

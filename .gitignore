@@ -1,0 +1,18 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Capacitor / Android build artifacts (folder android/ tetap DI-COMMIT,
+# hanya hasil build & cache gradle yang diabaikan)
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+*.apk
+*.aab

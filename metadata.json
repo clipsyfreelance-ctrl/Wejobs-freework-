@@ -1,0 +1,6 @@
+{
+  "name": "WEJOBS",
+  "description": "MICRO JOBS • SIMPLE TASKS • REAL REWARDS - Professional freelance and writing micro-job platform with task assignment, submissions, balance ledger, withdrawals, and admin control.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
